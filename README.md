@@ -1,2 +1,9 @@
-# NYC_Transportation_Demand
+# NYC Transportation Demand Prediction
+
+This project aims to develop a machine learning model to predict transportation demands in New York City based on geographic zones. The transportation includes **taxis**, **for-hire vehicles** (FHV) (i.e., Uber, Lyft, etc.), **buses** and **subways**. 
+
+By analysing factors such as **weather conditions**, **traffic incidents**, and **events**, the model aims to provide accurate forecasts to improve transportation efficiency.
+
+To achieve this, the project integrates data from OpenWeather, NYC TLC, NYC OpenData, New York State Data, and Eventbrite. The final product will include an interactive dashboard and APIs, offering real-time and predictive insights into taxi demand patterns.
+
  

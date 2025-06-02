@@ -9,14 +9,14 @@ The demand for taxi and ride-hailing services is influenced by various ever-chan
 
 ### Objectives
 - To build a predictive system which forecasts zone-based taxi and ride-hailing demand in New York City, leveraging real-time data on weather conditions, traffic disruptions, and local events.
-- To deploy an interactive dashboard that provides actionable insights on current and upcoming high-demand zones, enabling better fleet allocation and operational planning for transportation providers.
+- To develop (and deploy) an interactive dashboard that provides actionable insights on current and upcoming high-demand zones, enabling better fleet allocation and operational planning for transportation providers.
 
 ### Tech Stack
-**Languages & Libraries**: Python, Pandas, NumPy, Scikit-learn, XGBoost, Statsmodels
-**Data Sources**: NYC TLC, Open-Meteo API, NYC OpenData, Eventbrite API, NYS 511 (traffic & events)
-**Visualisation & Dashboarding**: Streamlit
-**Pipeline & Automation**: Jupyter, Python Scripts, (optionally) Airflow or Prefect
-**Deployment (Optional)**: AWS
+- **Languages & Libraries**: Python, Pandas, NumPy, Scikit-learn, XGBoost, Statsmodels
+- **Data Sources**: NYC TLC, Open-Meteo API, NYC OpenData, Eventbrite API, NYS 511 (traffic & events)
+- **Visualisation & Dashboarding**: Streamlit
+- **Pipeline & Automation**: Jupyter, Python Scripts, (optionally) Airflow or Prefect
+- **Deployment (Optional)**: AWS
 
 ---
 

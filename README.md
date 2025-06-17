@@ -1,6 +1,6 @@
 # NYC Transportation Demand Prediction
 
-This project aims to develop a machine learning model to predict transportation demands in New York City based on geographic zones. The transportation includes **taxis**, **for-hire vehicles** (FHV) (i.e., Uber, Lyft, etc.), **buses** and **subways**. By analysing factors such as weather conditions, traffic disruptions, and events, the model aims to provide accurate forecasts to improve transportation efficiency.
+This project aims to develop a fully functional data pipeline using Airflow which informs fleet management in New York City. By the end of this project, it should include an ML model which predicts transportation demands in New York City based on geographic zones, displayed within a dashboard using Streamlit. Transportation includes **taxis**, **for-hire vehicles** (FHV) (i.e., Uber, Lyft, etc.), **buses** and **subways**. By analysing factors such as weather conditions, traffic disruptions, and events, the model aims to provide accurate forecasts to improve transportation efficiency.
 
 ## Project Details
 ### Problem Statement
@@ -12,17 +12,14 @@ The demand for taxi and ride-hailing services is influenced by various ever-chan
 - To develop (and deploy) an interactive dashboard that provides actionable insights on current and upcoming high-demand zones, enabling better fleet allocation and operational planning for transportation providers.
 
 ### Tech Stack
-- **Languages & Libraries**: Python, Pandas, NumPy, Scikit-learn, XGBoost, Statsmodels
+- **Languages & Libraries**: Python, Pandas, NumPy, Scikit-learn, XGBoost
 - **Data Sources**: NYC TLC, Open-Meteo API, NYC OpenData, Eventbrite API, NYS 511 (traffic & events)
 - **Visualisation & Dashboarding**: Streamlit
-- **Pipeline & Automation**: Jupyter, Python Scripts, (optionally) Airflow or Prefect
-- **Deployment (Optional)**: AWS
-
+- **Pipeline & Automation**: Jupyter, Python Scripts, Airflow
 
  # Data Pipeline Design 
  Updated: 16/6/2025
 
 ![image](https://github.com/user-attachments/assets/011fc3a7-4716-4126-aace-37d4899cd55a)
-
 
 

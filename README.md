@@ -17,4 +17,12 @@ The demand for taxi and ride-hailing services is influenced by various ever-chan
 - **Visualisation & Dashboarding**: Streamlit
 - **Pipeline & Automation**: Jupyter, Python Scripts, (optionally) Airflow or Prefect
 - **Deployment (Optional)**: AWS
- 
+
+
+ # Data Pipeline Design 
+ Updated: 16/6/2025
+
+![image](https://github.com/user-attachments/assets/011fc3a7-4716-4126-aace-37d4899cd55a)
+
+
+

@@ -1,0 +1,31 @@
+# analysis
+pandas
+numpy
+
+# visualisation
+matplotlib
+seaborn
+plotly
+
+# api handling
+requests
+requests_cache
+retry-requests
+
+# datetime handling
+python-dateuntil
+
+# web dashboard
+streamlit
+
+# machine learning
+scikit-learn
+
+# geospatial
+geopandas
+
+# scheduling
+apache-airflow==2.9.0
+
+# External APIs
+openmeteo-requests

@@ -13,7 +13,7 @@ requests_cache
 retry-requests
 
 # datetime handling
-python-dateuntil
+python-dateutil
 
 # web dashboard
 streamlit

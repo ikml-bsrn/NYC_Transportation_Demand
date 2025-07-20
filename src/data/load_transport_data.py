@@ -1,14 +1,15 @@
 import pandas as pd
 
-def load_taxi():
+def loadTaxi(url):
     """
     Loads the Yellow Taxi trip data for December 2024 from the NYC TLC CloudFront URL.
+
+    Args:
+        url (str): URL to retrieve taxi trip data file.
 
     Returns:
         pd.DataFrame: DataFrame containing the taxi trip data.
     """
-
-    url = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-12.parquet"
 
     try:
         taxi_df = pd.read_parquet(url)
@@ -21,15 +22,16 @@ def load_taxi():
         return None
     
 
-def load_fhv():
+def loadFHV(url):
     """
     Loads the FHV Taxi trip data for December 2024 from the NYC TLC CloudFront URL.
+
+    Args:
+        url (str): URL to retrieve taxi trip data file.
 
     Returns:
         pd.DataFrame: DataFrame containing the FHV trip data.
     """
-
-    url = "https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2024-12.parquet"
 
     try:
         fhv_df = pd.read_parquet(url)
@@ -42,7 +44,7 @@ def load_fhv():
         return None
     
 
-def load_subway():
+def loadSubway():
     """
     Loads the Subway Ridership data for December 2024 from the local repository.
 
@@ -53,7 +55,7 @@ def load_subway():
     path = '/Users/ikmalbasirun/Documents/GitHub/NYC_Transportation_Demand/data/raw/MTA_Subway_Hourly_Ridership__2020-2024_20250415.csv'
 
     try:
-        subway_ridership_df = pd.read_parquet(path)
+        subway_ridership_df = pd.read_csv(path)
 
         return subway_ridership_df
     
@@ -63,7 +65,7 @@ def load_subway():
         return None
     
 
-def load_bus():
+def loadBus():
     """
     Loads the Bus Ridership data for December 2024 from local repository.
 
@@ -74,7 +76,7 @@ def load_bus():
     path = '/Users/ikmalbasirun/Documents/GitHub/NYC_Transportation_Demand/data/raw/MTA_Bus_Hourly_Ridership__2020-2024_20250415.csv'
 
     try:
-        bus_ridership_df = pd.read_parquet(path)
+        bus_ridership_df = pd.read_csv(path)
 
         return bus_ridership_df
     
@@ -84,7 +86,7 @@ def load_bus():
         return None    
     
 
-def load_taxi_zone():
+def loadTaxiZone():
     """
     Loads the taxi zone data for New York City from the NYC TLC. This is important for geospatial context.
 

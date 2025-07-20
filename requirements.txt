@@ -15,6 +15,9 @@ retry-requests
 # datetime handling
 python-dateutil
 
+# Azure-ML
+azureml.opendatasets
+
 # web dashboard
 streamlit
 

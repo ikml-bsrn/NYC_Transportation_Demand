@@ -1,62 +1,90 @@
-from src.data.load_transport_data import load_taxi, load_fhv
-from src.processing.transform_transport_data import filter_by_date, transform_fhv_df, transform_taxi_df, create_trips_df
-
 def main():
+    from src.data.load_transport_data import loadTaxi, loadFHV, loadBus, loadSubway, loadTaxiZone
+    from src.data.load_weather_data import loadWeatherOpenMeteo
 
-    ### TAXI
+    from src.processing.transform_data import filterByDate, transformFHV, transformTaxi, createTripsDF, createDemandDF, transformWeatherData, mergeWeatherData, mergeTaxiZoneData
+    from src.processing.clean_data import cleanDataFrame
 
-    # loading taxi_df
-    print("Loading taxi data...")
-    taxi_df = load_taxi()
+    ### LOADING DATA
 
-    # transforming taxi_df
-    if taxi_df is not None:
-        # Filter by date
-        print("Filtering taxi_df by date...")
-        filter_by_date(taxi_df,'tpep_pickup_datetime', 2024, 12)
+    print("Loading data...")
 
-        print("Cleaning taxi_df...")
-        transformed_taxi_df = transform_taxi_df(taxi_df)
+    # taxi_df
+    taxi_df = loadTaxi("https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-12.parquet") # taxi trip dataset url
+    print("     Taxi data loaded successfully.")
 
-        print("Saving taxi_df as CSV...")
-        transformed_taxi_df.to_csv("data/processed/cleaned_taxi_dec2024.csv", index=False)
-    else:
-        print("Taxi data not loaded.")
+    # fhv_df
+    fhv_df = loadFHV("https://d37ci6vzurychx.cloudfront.net/trip-data/fhvhv_tripdata_2024-12.parquet") # FHV trip dataset url
+    print("     FHV data loaded successfully.")
 
-    ### FHV
-
-    # loading fhv_df
-    print("Loading FHV data...")
-    fhv_df = load_fhv()
-
-    # transforming taxi_df
-    if fhv_df is not None:
-        # Filter by date
-        print("Filtering fhv_df by date...")
-        filter_by_date(fhv_df,'request_datetime', 2024, 12)
-
-        print("Cleaning fhv_df...")
-        transformed_fhv_df = transform_fhv_df(fhv_df)
-
-        print("Saving fhv_df as CSV...")
-        transformed_fhv_df.to_csv("data/processed/cleaned_fhv_dec2024.csv", index=False)
-    else:
-        print("FHV data not loaded.")
-
-    ### TRIPS DF
+    # subway_df
+    subway_df = loadSubway()
+    print("     Subway data loaded successfully.")
     
-    # Joining taxi and FHV dataframes
-    if (transformed_taxi_df is not None) and (transform_fhv_df is not None):
+    # bus_df
+    bus_df = loadBus()
+    print("     Bus data loaded successfully.")
 
-        print("Creating trips_df...")
-        trips_df = create_trips_df(transform_fhv_df, transformed_taxi_df)
+    # weather_df                      #lat     #lon      #start date   #end date
+    hourly_weather_df = loadWeatherOpenMeteo(40.7143, -74.006, "2024-12-01", "2025-01-01")
+    print("     Weather data loaded successfully.")
 
-        print("Saving trips_df as CSV...")
-        trips_df.to_csv("data/processed/trips_dec2024.csv", index=False)
-    else:
-        print("Trips dataframe not created.")
+    # taxi_zone_df
+    zone_df = loadTaxiZone()
+    print("     Taxi zone data loaded successfully.")
+
+    ### TRANSFORMING DATA
+
+    print("Tranforming data...")
+
+    print("     Transforming taxi_df...")
+    transformed_taxi_df = transformTaxi(taxi_df)
+
+    print("     Transforming fhv_df...")
+    transformed_fhv_df = transformFHV(fhv_df)
+    
+    print("     Transforming hourly_weather_df...")
+    transformed_hourly_weather_df = transformWeatherData(hourly_weather_df)
+
+    ### CLEANING DATA
+
+    print("Cleaning data...")   
+
+    print("     Cleaning taxi_df...")
+    cleaned_taxi_df = cleanDataFrame(transformed_taxi_df)
+
+    print("     Cleaning fhv_df...")
+    cleaned_fhv_df = cleanDataFrame(transformed_fhv_df)
+
+    print("     Cleaning hourly_weather_df...")
+    cleaned_hourly_weather_df = cleanDataFrame(transformed_hourly_weather_df)
+
+    ### DATA AGGREGATION
+    print("Aggregating data...")
+
+    # Joining Taxi and FHV
+    print("     Joining taxi and FHV datasets...")
+    trips_df = createTripsDF(cleaned_fhv_df, cleaned_taxi_df)
+    
+    # Creating the main dataset 'demand_df' for ML training
+    print("     Creating Demand dataset...")
+    demand_df = createDemandDF(trips_df)
+
+    # Merge taxi zone data with demand dataset
+    #print("     Merging taxi zones...")
+    #demand_df = mergeTaxiZoneData(demand_df, zone_df)
+
+    # Merge weather data with demand dataset
+    print("     Merging weather data...")
+    merged_df = mergeWeatherData(demand_df, cleaned_hourly_weather_df)
+
+    print("Task completed. Dataset saved.")
+    
+    merged_df.to_csv("/Users/ikmalbasirun/Documents/GitHub/NYC_Transportation_Demand/data/processed/transport_demand_dec2024.csv", index=False)
 
 
+
+# initiate script
 if __name__ == "__main__":
     main()
 

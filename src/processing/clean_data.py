@@ -9,6 +9,7 @@ def cleanDataFrame(df):
     Return:
         pd.DataFrame or None: DataFrame with duplicates removed, 
     """
+    # checking duplicates
     print("     Checking duplicates...")
     duplicate = df.duplicated()
     if True in duplicate:
@@ -17,10 +18,10 @@ def cleanDataFrame(df):
     else:
         print("       No duplicates found.")
 
+    # analysing and handling missing values
     print("     Analysing missing values...")
     missing_df = df.isna().sum()
 
-    # analysing and handling missing values
     for column, missing_count in missing_df.items():
         percentage = (missing_count / len(df)) * 100
         print(f"       {column}: {percentage:.0f}%")
@@ -39,5 +40,28 @@ def cleanDataFrame(df):
                 df[column].fillna("Unknown", inplace=True)
                 print(f"    Missing values in {column} filled with 'Unknown'.")
 
-    return df
+    # handling outliers
+    print("     Handling outliers using IQR method...")
+    numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
 
+    for col in numeric_cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+
+        if IQR == 0:
+            print(f"         Skipped outlier check for '{col}' (IQR=0).")
+            continue
+        else:
+            original_len = len(df)
+            df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
+            removed = original_len - len(df)
+
+            if removed > 0:
+                print(f"         Removed {removed} outliers from '{col}'.")
+            else:
+                print(f"         No outliers detected in '{col}'.")
+    
+    return df

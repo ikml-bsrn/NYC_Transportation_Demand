@@ -5,7 +5,7 @@ def filterByDate(df, column_name, year, month):
     This module filters the DataFrame by year and month.
 
     Args:
-        DataFrame (Pandas DataFrame): Pandas DataFrame which contains a DateTime column.
+        df (Pandas DataFrame): Pandas DataFrame which contains a DateTime column.
         column_name (Datetime): Name of column to be filtered.
         Year (int): The targeted year.
         Month (int): The targeted month.
@@ -26,6 +26,33 @@ def filterByDate(df, column_name, year, month):
         print(f"Unable to filter by year and month: {e}")
 
         return None
+    
+
+def splitDateTime(df, column_name):
+    """
+    This module splits DateTime series in a DataFrame into 'date', 'hour' and 'day of week' separately. 
+
+    Args:
+        df (Pandas DataFrame): Pandas DataFrame which contains a DateTime column.
+        column_name (Datetime): Name of DateTime column.
+
+    Returns:
+        DataFrame if successful, else None.
+    """
+    import pandas as pd
+
+    try:
+        # ensure column is in DateTime format
+        df[column_name] = pd.to_datetime(df[column_name])
+
+        df['hour'] = df[column_name].dt.hour # hour
+        df['day_of_week'] = df[column_name].dt.dayofweek # day of week
+        df['date'] = pd.to_datetime(df[column_name].dt.date) # date
+
+        return df
+    
+    except Exception as e:
+        print(f"Unable to split DateTime column: {e}")
 
 ### FHV DF
 
@@ -49,7 +76,7 @@ def transformFHV(df):
 
     df['service_provider'] = df['hvfhs_license_num'].replace(fhs_code)
 
-    # removing unnecessary columns
+    # removing irrelevant columns
     df = df.drop(columns=['hvfhs_license_num',
                             'dispatching_base_num','originating_base_num',
                             'shared_request_flag','shared_match_flag','access_a_ride_flag',
@@ -62,11 +89,13 @@ def transformFHV(df):
                                 })
 
     # splitting datetime format into 'date' and 'hour'
-    df['date'] = pd.to_datetime(df['transit_timestamp'].dt.date)
-    df['hour'] = df['transit_timestamp'].dt.hour
+    df = splitDateTime(df, 'transit_timestamp')
     
-    # dropping 'request_datetime' as we don't need it anymore
+    # dropping unnecessary columns
     df.drop(columns=['request_datetime', 'transit_timestamp'],inplace=True)
+
+    # ensure LocationID is string/object type (for merging with subway/bus datasets)
+    df['LocationID'] = df['LocationID'].astype('object')
 
     return df
 
@@ -90,8 +119,7 @@ def transformTaxi(df):
     df['service_provider'] = 'Taxi' # to fill in the 'service_provider' before joining with the FHV df
 
     # splitting datetime format into 'date' and 'hour'
-    df['date'] = pd.to_datetime(df['tpep_pickup_datetime'].dt.date)
-    df['hour'] = df['tpep_pickup_datetime'].dt.hour
+    df = splitDateTime(df, 'tpep_pickup_datetime')
 
     df = df.rename(columns={'PULocationID':'LocationID'})
 
@@ -100,6 +128,72 @@ def transformTaxi(df):
                             'payment_type','DOLocationID','RatecodeID','trip_distance','tpep_dropoff_datetime',
                             'fare_amount','total_amount','extra','congestion_surcharge'
                             ])
+    
+    # ensure LocationID is string/object type (for merging with subway/bus datasets)
+    df['LocationID'] = df['LocationID'].astype('object')
+    
+    return df
+
+## BUS_DF
+def transformBus(df):
+    """
+    This module transforms the Bus ridership dataset to ensure consistency with other datasets prior to data aggregation.
+
+    Args:
+        DataFrame (Pandas DataFrame): Pandas DataFrame which contains Bus data.
+
+    Returns:
+        DataFrame if successful, else None.
+    """
+    import pandas as pd
+
+    # splitting datetime format into 'date' and 'hour'
+    df = splitDateTime(df, 'transit_timestamp')
+
+    df = df.drop(columns=['fare_class_category', 'transfers', 'payment_method','transit_timestamp'])
+
+    df = df.groupby(['date', 'hour', 'day_of_week', 'bus_route']).sum('ridership').reset_index()
+
+    df.rename(
+        columns={'ridership':'demand','bus_route':'LocationID'},
+        inplace=True
+        )
+
+    df['service_provider'] = 'Bus'
+    
+    return df
+
+## SUBWAY_DF
+def transformSubway(df):
+    """
+    This module transforms the Subway ridership dataset to ensure consistency with other datasets prior to data aggregation.
+
+    Args:
+        DataFrame (Pandas DataFrame): Pandas DataFrame which contains Subway data.
+
+    Returns:
+        DataFrame if successful, else None.
+    """
+    import pandas as pd
+
+    # splitting datetime format into 'date' and 'hour'
+    df = splitDateTime(df, 'transit_timestamp')
+
+    df = df.drop(columns=['fare_class_category', 'transfers', 'latitude','longitude','payment_method','transit_timestamp',
+                                        'station_complex', 'borough', 'Georeference'])
+
+    df = df.groupby(['date', 'hour', 'day_of_week', 'station_complex_id']).sum('ridership').reset_index()
+
+    df.rename(
+        columns={'ridership':'demand', 
+                'transit_mode':'service_provider',
+                'station_complex_id':'LocationID'},
+        inplace=True
+        )
+
+    df['LocationID'] = df['LocationID'].astype('category')
+        
+    df['service_provider'] = 'Subway'
     
     return df
 
@@ -151,6 +245,7 @@ def transformWeatherData(df):
 
     # map codes into a new column
     df['weather_description'] = df['weather_code'].map(weather_codes)
+    df['weather_description'] = df['weather_description'].astype('category') # change type to 'category'
 
     # Remove timezone for standardisation
     df['date'] = df['date'].dt.tz_convert('UTC').dt.tz_localize(None)
@@ -163,32 +258,33 @@ def transformWeatherData(df):
 
 ## DATA AGGREGATION
 
-def createTripsDF(df1, df2):
+def createTripsDF(fhv_df, taxi_df):
     import pandas as pd
     """
     Joins the taxi and FHV dataframes into one, called trips_df.
 
     Args:
-        df1 (pd.DataFrame): DataFrame for Taxi data.
-        df2 (pd.DataFrame): DataFrame for FHV data.
+        fhv_df (pd.DataFrame): DataFrame for Taxi data.
+        taxi_df (pd.DataFrame): DataFrame for FHV data.
     
     Returns:
         pd.DataFrame or None: Trip data (taxi and FHV joined) if successful, else None. 
     """
 
     try:
-        trips_df = df1.merge(df2, how='outer', on=[
-            'date','hour','service_provider','LocationID'
-            ])
-        
-        return trips_df
+        transport_df = fhv_df.merge(taxi_df, 
+                               how='outer', 
+                               on=['date','hour','day_of_week','service_provider','LocationID']
+                               )
+
+        return transport_df
     
     except Exception as e:
         print(f"Unable to create trips_df: {e}")
 
 def createDemandDF(df):
     """
-    Aggregates the DataFrame by 'date', 'hour', 'service_provider', and 'LocationID'.
+    Creates a DataFrame which calculates transportation demand by 'date', 'hour', 'service_provider', and 'LocationID'.
 
     Args:
         df (pd.DataFrame): DataFrame for trips data.
@@ -196,9 +292,13 @@ def createDemandDF(df):
     Returns:
         pd.DataFrame or None: Transport demand data if successful, else None. 
     """
+    import pandas as pd
 
     try:
-        df = df.groupby(['date','hour','service_provider', 'LocationID']).size().reset_index(name='demand')
+        df = df.groupby(['date','hour','service_provider','day_of_week','LocationID']).size().reset_index(name='demand')
+        
+        # ensure LocationID is string/object type (for merging with subway/bus datasets)
+        df['LocationID'] = df['LocationID'].astype('object')
         
         return df
     
@@ -262,5 +362,57 @@ def mergeWeatherData(demand_df, weather_data):
         print(f"Unable to merge weather data: {e}")
 
         return demand_df
-
     
+# Merge Public Transport data
+def mergePublicTransportData(demand_df, bus_df, subway_df):
+    """
+    Merges Bus and Subway ridership datasets with the Demand dataset.
+
+    Args:
+        demand_df (pd.DataFrame): DataFrame for Demand data.
+        bus_df (pd.DataFrame): DataFrame for Bus ridership data.
+        subway_df (pd.DataFrame): DataFrame for Subway ridership data.
+    
+    Returns:
+        pd.DataFrame or None: Transport demand data if successful, else None. 
+    """
+    import pandas as pd
+
+    try:
+        # Merge bus dataset
+        merged_df = demand_df.merge(
+            bus_df,
+            on=['date','hour','day_of_week', 'service_provider','LocationID','demand'],
+            how='outer'
+        )
+
+        # Merge subway dataset
+        merged_df = merged_df.merge(
+            subway_df,
+            on=['date','hour','day_of_week','service_provider','LocationID','demand'],
+            how='outer'
+        )
+
+        return merged_df
+    
+    except Exception as e:
+        print(f"Unable to merge public transport data: {e}")
+
+def transform_to_CityWideDF(df, subway_df, bus_df):
+    """
+    Transforms Demand DF into city-wide, instead of zone-based, by removing 'LocationID' and merging two other modes of transportation.
+
+    Args:
+        df (pd.DataFrame): DataFrame for Demand data.
+        subway_df (pd.DataFrame): DataFrame for Subway ridership data.
+        bus_df (pd.DataFrame): DataFrame for Bus ridership data.
+    
+    Returns:
+        pd.DataFrame or None: City-wide transport demand data if successful, else None. 
+    """
+    import pandas as pd
+    
+    df.drop(columns='LocationID', inplace=True)
+
+    # reaggregates (city-wide) demand without zone-based feature: 'LocationID'
+    df = df.groupby(['date','hour','service_provider']).size().reset_index(name='demand')

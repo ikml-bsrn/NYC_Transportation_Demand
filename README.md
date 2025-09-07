@@ -4,9 +4,9 @@ This project aims to develop a fully functional data pipeline using Airflow whic
 
 ## Current Progress Summary (7/9/2025)
 - Pipeline Development: Built a modular Python pipeline to clean, transform, and aggregate large datasets (Yellow Taxi, High-Volume FHV, and subway ridership).
-Exploratory Analysis: Conducted demand exploration in Tableau, visualizing weekly, daily, and hourly patterns across modes and zones, and identifying busiest time periods and boroughs.
-External Factors: Incorporated weather data (conditions) into the dataset to study its impact on transport demand.
-Dashboards: Designed interactive Tableau dashboards for stakeholders to explore multi-modal demand trends across the city.
+- Exploratory Analysis: Conducted demand exploration in Tableau, visualizing weekly, daily, and hourly patterns across modes and zones, and identifying busiest time periods and boroughs.
+- External Factors: Incorporated weather data (conditions) into the dataset to study its impact on transport demand.
+- Dashboards: Designed interactive Tableau dashboards for stakeholders to explore multi-modal demand trends across the city.
 
 **Future Directions**:
 - Integrate permitted events, and traffic incident data to capture broader contextual demand drivers.

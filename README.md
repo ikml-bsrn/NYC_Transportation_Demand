@@ -8,8 +8,8 @@ This project aims to develop a fully functional data pipeline using Airflow whic
 The demand for taxi and ride-hailing services is influenced by various ever-changing factors such as weather, road-related incidents and conditions (including route alternatives), and nearby events (Liu et al., 2020). According to Lepage and Morency (2020), weather, activities and service disruptions deeply impact demands of these modes of transportation. In order to support commuters in using these services and maximise profits, taxi and ride-hailing companies must be strategic in allocating vehicles and anticipate demand fluctuations. With proper forecasting, prediction and planning, commuters are more likely to opt for taxis and ride-hailing as they become more reliable and convenient for them.
 
 ### Objectives
+- To develop interactive dashboards which provides actionable insights on past, current and upcoming high-demand zones, enabling better fleet allocation and operational planning for transportation providers. 
 - To build a predictive system which forecasts zone-based taxi and ride-hailing demand in New York City, leveraging real-time data on weather conditions, traffic disruptions, and local events.
-- To develop interactive dashboards which provides actionable insights on current and upcoming high-demand zones, enabling better fleet allocation and operational planning for transportation providers.
 
 ### Tech Stack
 - **Languages & Libraries**: Python, Pandas, NumPy, Scikit-learn, XGBoost
@@ -18,7 +18,6 @@ The demand for taxi and ride-hailing services is influenced by various ever-chan
 - **Pipeline & Automation**: Jupyter, Python Scripts, Airflow
 
  # Data Pipeline Design 
- Updated: 16/6/2025
 
 ![image](https://github.com/user-attachments/assets/011fc3a7-4716-4126-aace-37d4899cd55a)
 
